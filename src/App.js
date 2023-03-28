@@ -1,57 +1,51 @@
 import React from "react";
+import List from "./List";
+import Search from "./Seach";
 
-const list = [
-  {
-    title: "React",
-    url: "http://www.reactjs.org/",
-    objectID: 0,
-  },
 
-  {
-    title: "Redux",
-    url: "http://wwww.redux.js.org/",
-    objectID: 1,
-  },
-
-]
 function App() {
+  
+      const handleSearch = (event) => {
+        console.log(event.target.value)
+      }
 
-  //1 
-  const listItems = list.map( item => (
-    <li key={item.objectID}>{item.title}</li>
-  )) 
+  const stories = [
+    {
+      title: "React",
+      url: "http://www.reactjs.org/",
+      objectID: 0,
+    },
+  
+    {
+      title: "Redux",
+      url: "http://wwww.redux.js.org/",
+      objectID: 1,
+    },
+  ];
 
-  //3 
-  function listItem (item) {
-    return <li key={item.objectID}>{item.title}</li>
-  }
-  return (
+  const jsLibraries = [
+    {
+      title: "jQuery",
+      url: "http://www.jQuery.org/",
+      objectID: 0,
+    },
+  
+    {
+      title: "Angular",
+      url: "http://wwww.angularjs.org/",
+      objectID: 1,
+    },
+  ];
+
+  
+  return (//we are passing different sets of values tp render different content
     <div>
-      <h1>My Hacker Stories</h1>
-      <hr/>
-{/* {1} */}
-      <ul>
-        {listItems}
-      </ul>
-
-{/* {2} */}
-      <ul>
-        {list.map (listitem => (
-          <li key={listitem.objectID}>
-            <span>
-              <a href={listitem.url}>{listitem.title}</a>
-            </span>            
-          </li>
-        ))}
-      </ul>
-
-{/* {3} */}
-      <ul>
-        {list.map(listItem)}
-      </ul>
-
+      <List list={stories} title="React Ecosystem"/>
+      <List list={jsLibraries} title="Javascript Libraries"/>
+      <Search onSearch={handleSearch}/>
     </div>
-  );
+  )
+  ;
 }
 
 export default App;
