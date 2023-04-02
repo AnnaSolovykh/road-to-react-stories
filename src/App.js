@@ -1,13 +1,10 @@
 import React from "react";
 import List from "./List";
 import Search from "./Seach";
+import { useState } from "react";
 
 
 function App() {
-  
-      const handleSearch = (event) => {
-        console.log(event.target.value)
-      }
 
   const stories = [
     {
@@ -23,26 +20,42 @@ function App() {
     },
   ];
 
-  const jsLibraries = [
-    {
-      title: "jQuery",
-      url: "http://www.jQuery.org/",
-      objectID: 0,
-    },
+  // const jsLibraries = [
+  //   {
+  //     title: "jQuery",
+  //     url: "http://www.jQuery.org/",
+  //     objectID: 0,
+  //   },
   
-    {
-      title: "Angular",
-      url: "http://wwww.angularjs.org/",
-      objectID: 1,
-    },
-  ];
+  //   {
+  //     title: "Angular",
+  //     url: "http://wwww.angularjs.org/",
+  //     objectID: 1,
+  //   },
+  // ];
 
+  const [searchTerm,  setSearchTerm] = useState(''); 
   
-  return (//we are passing different sets of values tp render different content
+  const handleSearch = (event) => {
+      console.log(event.target.value);
+      setSearchTerm(event.target.value)
+    }
+
+  // const searchStories = stories.filter(function (story) {
+  //   return story.title.toLowerCase().includes(searchTerm.toLowerCase());
+  // });
+
+  const searchStories = stories.filter( (story) => 
+    story.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  return (
     <div>
-      <List list={stories} title="React Ecosystem"/>
-      <List list={jsLibraries} title="Javascript Libraries"/>
-      <Search onSearch={handleSearch}/>
+      <h1>My Hacker Stories</h1>
+      <Search search={searchTerm} onSearch={handleSearch} searchTerm={searchTerm}/>
+      <hr></hr>
+      <List list={searchStories} title="React Ecosystem" />
+      {/* <List list={jsLibraries} title="Javascript Libraries"/> */}
     </div>
   )
   ;
