@@ -36,14 +36,14 @@ function App() {
 
 
 
-  const [searchTerm,  setSearchTerm] = 
-    useState(localStorage.getItem('search') || 'React')
+  //const [searchTerm,  setSearchTerm] = 
+  //  useState(localStorage.getItem('search') || 'React')
   //we are setting searchTerm to default value that comes either from 
   //local Storage,or, if it doesn't exist,fr om the default key term React
   
-  useEffect(()=> {
-    localStorage.setItem('search', searchTerm)
-  }, [searchTerm]);
+  //useEffect(()=> {
+  //  localStorage.setItem('search', searchTerm)
+  //}, [searchTerm]);
   //"search" is equal to event.target.value
   //the first argument is function, 
   //the second argument is an array. We want the function to be called if the array changes.
@@ -52,6 +52,43 @@ function App() {
   //This is called the DEPENDANCY ARRAY
   //And whole effect is SIDE-EFFECT
 
+  //Creating a generic custom hook 
+
+  /*const useSemiPersistentState = () => {
+    const [searchTerm,  setSearchTerm] = 
+    useState(
+      localStorage.getItem('search') || 'React'
+      )
+      useEffect(()=> {
+        localStorage.setItem('search', searchTerm)
+      }, [searchTerm]);
+
+      return [searchTerm,  setSearchTerm];
+      //we need return these items to expose it to the world outside the function
+  };
+*/
+
+  //Creating a generic custom hook 
+//key - everything is saved with whatever you provide as a key
+
+  const useSemiPersistentState = (key, initialState) => {
+    const [value,  setValue] = 
+    useState(
+      localStorage.getItem(key) || initialState
+      )
+
+      useEffect(()=> {
+        localStorage.setItem(key, value)
+      }, 
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [value]);
+
+      return [value,  setValue];
+      //we need return these items to expose it to the world outside the function
+  };
+
+  
+  const [searchTerm,  setSearchTerm] = useSemiPersistentState('search', 'React');
 
   const handleSearch = (event) => {
       console.log(event.target.value);

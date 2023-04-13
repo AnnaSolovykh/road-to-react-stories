@@ -1,6 +1,6 @@
 function Search(props) {
     return (
-    <div>
+    <>
         <label htmlFor="search">Search: </label>
         <input 
             id="search" 
@@ -11,7 +11,7 @@ function Search(props) {
         <p>
             Seaching for <strong>{props.searchTerm}</strong> 
         </p>
-    </div>
+    </>
     )
 }
 
