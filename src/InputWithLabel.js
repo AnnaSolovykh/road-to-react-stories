@@ -1,12 +1,12 @@
 const InputWithLabel = ({
     id,
-    label,
     value,
     type="text",
-    onInputChange
+    onInputChange,
+    children
 }) => (
     <>
-        <label htmlFor={id}>{label}</label>
+        <label htmlFor={id}>{children}</label>
         &nbsp;
         <input 
             id={id} 

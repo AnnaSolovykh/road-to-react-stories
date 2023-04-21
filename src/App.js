@@ -49,13 +49,13 @@ function App() {
   return (
     <div>
       <h1>My Hacker Stories</h1>
-      {/* We are creating a generic input that we can use in other places*/}
       <InputWithLabel 
         id="search"
-        label="Search"
         value={searchTerm}
         onInputChange={handleSearch}
-      />
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
       <hr></hr>
       <List list={searchStories} title="React Ecosystem" />
     </div>
