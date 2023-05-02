@@ -16,67 +16,87 @@ const initialStories = [
   },
 ];
 
+
+const getAsyncStories = () => 
+new Promise (resolve => 
+  setTimeout(
+    () => resolve({ data: { stories: initialStories} }),
+    2000
+  )
+);
+
+const useSemiPersistentState = (key, initialState) => {
+const [value,  setValue] = 
+useState(
+  localStorage.getItem(key) || initialState
+  );
+  useEffect(()=> {
+    localStorage.setItem(key, value)
+  }, [value, key]);
+
+  return [value,  setValue];
+};
+
+const storiesReducer = (state, action) => {
+switch (action.type) {
+  case 'STORIES_FETCH_INIT':
+    return {
+      ...state,
+      isLoading: true,
+      isError: false,
+    };
+  case 'STORIES_FETCH_SUCCESS':
+    return {
+      ...state,
+      isLoading: false,
+      isError: false,
+      data: action.payload,
+    };
+  case 'STORIES_FETCH_FAILURE':
+    return {
+      ...state,
+      isLoading: false,
+      isError: true,
+    };
+  case 'REMOVE_STORY':
+    return {
+      ...state,
+      data: state.data.filter(
+        story => action.payload.objectID !== story.objectID
+      )
+    };
+  default: 
+    throw new Error();
+}
+};
+
 function App() {
-
-  const getAsyncStories = () => 
-    new Promise (resolve => 
-      setTimeout(
-        () => resolve({ data: { stories: initialStories} }),
-        2000
-      )
-    );
-  
-
-
-  const useSemiPersistentState = (key, initialState) => {
-    const [value,  setValue] = 
-    useState(
-      localStorage.getItem(key) || initialState
-      )
-
-      useEffect(()=> {
-        localStorage.setItem(key, value)
-      }, 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [value]);
-
-      return [value,  setValue];
-  };
-  
-  const storiesReducer = (state, action) => {
-    switch (action.type) {
-      case 'SET_STORIES': 
-        return action.payload;
-      case 'REMOVE_STORY':
-        return state.filter(
-          story => action.payload.objectID !== story.objectID
-        );
-      default: 
-        throw new Error();
-    }
-  };
   
   const [searchTerm,  setSearchTerm] = useSemiPersistentState('search', 'React');
 
   const [stories, dispatchStories] = useReducer(
     storiesReducer, 
-    []
+    {data: [], isLoading: false, isError: false}
   );
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
+    dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-    getAsyncStories().then(result => {
+    getAsyncStories()
+    .then(result => {
       dispatchStories({
-        type: 'SET_STORIES',
+        type: 'STORIES_FETCH_SUCCESS',
         payload: result.data.stories,
       });
-      setIsLoading(false);
     })
-      .catch(()=> setIsError(true))
-  }, [stories]);
+    .catch(() => 
+      dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
+    );
+  }, []);
+  //}, [stories.data]);  
+  //deletes both
+  //}, [searchTerm]);
+  //bug: double click to delete
   
   const handleRemoveStory = item => {
     dispatchStories({
@@ -86,11 +106,10 @@ function App() {
   };
 
   const handleSearch = (event) => {
-      console.log(event.target.value);
       setSearchTerm(event.target.value);
     };
 
-  const searchStories = stories.filter( (story) => 
+  const searchStories = stories.data.filter((story) => 
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
@@ -104,11 +123,14 @@ function App() {
       >
         <strong>Search:</strong>
       </InputWithLabel>
-      {isError && <p>Something went wrong...</p>}
-      {isLoading ? (
+      {stories.isError && <p>Something went wrong...</p>}
+      {stories.isLoading ? (
       <p>Loading...</p>
       ) : (
-      <List list={searchStories} onRemoveItem={handleRemoveStory} title="React Ecosystem" />
+      <List 
+        list={searchStories} 
+        onRemoveItem={handleRemoveStory} 
+        title="React Ecosystem" />
       )}
       </div>
   )
