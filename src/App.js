@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
 import List from "./List";
 import InputWithLabel from "./InputWithLabel";
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
@@ -58,23 +58,27 @@ function App() {
     {data: [], isLoading: false, isError: false}
   );
 
-  useEffect(() => {
+  const handleFetchStories = useCallback(() => {
     if (!searchTerm) return;
 
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-  fetch(`${API_ENDPOINT}${searchTerm}`)
-    .then(response => response.json())
-    .then(result => {
-      dispatchStories({
-        type: 'STORIES_FETCH_SUCCESS',
-        payload: result.hits,
-      });
-    })
-    .catch(() => 
-      dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
-    );
+    fetch(`${API_ENDPOINT}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => {
+        dispatchStories({
+          type: 'STORIES_FETCH_SUCCESS',
+          payload: result.hits,
+        });
+      })
+      .catch(() => 
+        dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
+      );
   }, [searchTerm]);
+
+  useEffect(() => {
+    handleFetchStories()
+  }, [handleFetchStories]);
 
   const handleRemoveStory = item => {
     dispatchStories({
