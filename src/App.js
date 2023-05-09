@@ -59,9 +59,11 @@ function App() {
   );
 
   useEffect(() => {
+    if (!searchTerm) return;
+
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-  fetch(`${API_ENDPOINT}react`)
+  fetch(`${API_ENDPOINT}${searchTerm}`)
     .then(response => response.json())
     .then(result => {
       dispatchStories({
@@ -72,12 +74,8 @@ function App() {
     .catch(() => 
       dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
     );
-  }, []);
-  //}, [stories.data]);  
-  //deletes both
-  //}, [searchTerm]);
-  //bug: double click to delete
-  
+  }, [searchTerm]);
+
   const handleRemoveStory = item => {
     dispatchStories({
       type: 'REMOVE_STORY',
@@ -88,10 +86,6 @@ function App() {
   const handleSearch = (event) => {
       setSearchTerm(event.target.value);
     };
-
-  const searchStories = stories.data.filter((story) => 
-    story.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
   
   return (
     <div>
@@ -108,7 +102,7 @@ function App() {
       <p>Loading...</p>
       ) : (
       <List 
-        list={searchStories} 
+        list={stories.data} 
         onRemoveItem={handleRemoveStory} 
         title="React Ecosystem" />
       )}
