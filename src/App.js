@@ -1,29 +1,8 @@
 import React, { useEffect, useReducer, useState } from "react";
 import List from "./List";
 import InputWithLabel from "./InputWithLabel";
+const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
-const initialStories = [
-  {
-    title: "React",
-    url: "http://www.reactjs.org/",
-    objectID: 0,
-  },
-
-  {
-    title: "Redux",
-    url: "http://wwww.redux.js.org/",
-    objectID: 1,
-  },
-];
-
-
-const getAsyncStories = () => 
-new Promise (resolve => 
-  setTimeout(
-    () => resolve({ data: { stories: initialStories} }),
-    2000
-  )
-);
 
 const useSemiPersistentState = (key, initialState) => {
 const [value,  setValue] = 
@@ -82,11 +61,12 @@ function App() {
   useEffect(() => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-    getAsyncStories()
+  fetch(`${API_ENDPOINT}react`)
+    .then(response => response.json())
     .then(result => {
       dispatchStories({
         type: 'STORIES_FETCH_SUCCESS',
-        payload: result.data.stories,
+        payload: result.hits,
       });
     })
     .catch(() => 
