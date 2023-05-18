@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import List from "./List";
-import InputWithLabel from "./InputWithLabel";
+import SearchForm from "./SearchForm";
+import axios from "axios";
+//npm install --save axios in terminal
+
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
 
@@ -60,20 +63,19 @@ function App() {
 
   const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
 
-  const handleFetchStories = useCallback(() => {
+  const handleFetchStories = useCallback(async() => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-    fetch(url)
-      .then(response => response.json())
-      .then(result => {
-        dispatchStories({
-          type: 'STORIES_FETCH_SUCCESS',
-          payload: result.hits,
-        });
-      })
-      .catch(() => 
-        dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
-      );
+  try {
+    const result = await axios.get(url); //axios in the place of fetch, also we don't need to convert to json any more
+    dispatchStories({
+      type: 'STORIES_FETCH_SUCCESS',
+      payload: result.data.hits, //if we use axios, we add data.
+    });
+    }
+    catch{
+      dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
+    }
   }, [url]);
 
   useEffect(() => {
@@ -88,32 +90,24 @@ function App() {
   };
 
   const handleSearchInput = event => {
-    setSearchTerm(event.target.value)
+    event.preventDefault();
+    setSearchTerm(event.target.value);
   }
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = event => {
+    event.preventDefault();
     setUrl(`${API_ENDPOINT}${searchTerm}`)
   }
 
   return (
     <div>
       <h1>My Hacker Stories</h1>
-      <InputWithLabel 
-        id="search"
-        value={searchTerm}
-        onInputChange={handleSearchInput}
-      >
-        <strong>Search:</strong>
-        
-      </InputWithLabel>
-      <button
-        type="button"
-        disabled={!searchTerm}
-        onClick={handleSearchSubmit}
-        >
-        Submit
-      </button>
 
+      <SearchForm
+        searchTerm={searchTerm}
+        onSearchInput={handleSearchInput}
+        onSearchSubmit={handleSearchSubmit}
+      />
 
       {stories.isError && <p>Something went wrong...</p>}
 
