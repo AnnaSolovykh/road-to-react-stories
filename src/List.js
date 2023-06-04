@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { ReactComponent as Check } from './check.svg';
 
 const StyledItem = styled.li`
     display: flex;
@@ -30,7 +31,7 @@ const StyledButton = styled.button`
 
     &:hover {
         background: #171212;
-        color: #ffffff;
+        fill: #ffffff;
     }
 `;
 
@@ -57,7 +58,9 @@ export const Item = ({ item, onRemoveItem }) => {
                 <a href={item.url}>{item.title}</a>      
         </StyledColumn>
         <StyledColumn width="20%">
-            <StyledButtonSmall type="button" onClick={()=> onRemoveItem(item)}>remove</StyledButtonSmall>
+            <StyledButtonSmall type="button" onClick={()=> onRemoveItem(item)}>
+                <Check height="18px" width="18px" />
+            </StyledButtonSmall>
         </StyledColumn>
     </StyledItem>
     )
