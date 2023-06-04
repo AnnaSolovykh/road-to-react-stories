@@ -2,10 +2,29 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import List from "./List";
 import SearchForm from "./SearchForm";
 import axios from "axios";
-//npm install --save axios in terminal
+import styled from "styled-components";
+
+
 
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
+const StyledContainer = styled.div`
+  height: 130vh;
+  padding: 20px;
+  background: #83a4d4;
+  background: linear-gradient(to left, #b6fbff, #83a4d4);
+  color: #171212;
+
+  @media only screen and (max-width:800px) {
+    height: 200vh;
+}
+`;
+
+const StyledHeadlinePrimary = styled.h1`
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: 2px;
+`;
 
 const useSemiPersistentState = (key, initialState) => {
 const [value,  setValue] = 
@@ -100,8 +119,8 @@ function App() {
   }
 
   return (
-    <div>
-      <h1>My Hacker Stories</h1>
+    <StyledContainer>
+      <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
 
       <SearchForm
         searchTerm={searchTerm}
@@ -119,7 +138,7 @@ function App() {
         onRemoveItem={handleRemoveStory} 
         title="React Ecosystem" />
       )}
-      </div>
+      </StyledContainer>
   )
   ;
 }
