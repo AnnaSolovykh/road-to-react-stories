@@ -1,5 +1,5 @@
 import InputWithLabel from "./InputWithLabel";
-import styled from "styled-components";
+import styled from 'styled-components';
 
 const StyledSearchForm = styled.form`
     padding: 10px 0 20px 0;
@@ -32,8 +32,17 @@ const StyledButtonLarge = styled(StyledButton)`
     margin-left: 0.3rem;
 `;
 
+type SearchFormProps = {
+    searchTerm: string;
+    onSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onSearchSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+};
 
-const SearchForm = ({searchTerm, onSearchInput, onSearchSubmit}) => (
+const SearchForm = ({
+    searchTerm, 
+    onSearchInput, 
+    onSearchSubmit
+}: SearchFormProps) => (
     <StyledSearchForm onSubmit={onSearchSubmit}>
         <InputWithLabel 
             id="search"

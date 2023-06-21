@@ -2,9 +2,7 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import List from "./List";
 import SearchForm from "./SearchForm";
 import axios from "axios";
-import styled from "styled-components";
-
-
+import styled  from "styled-components";
 
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
@@ -26,7 +24,10 @@ const StyledHeadlinePrimary = styled.h1`
   letter-spacing: 2px;
 `;
 
-const useSemiPersistentState = (key, initialState) => {
+const useSemiPersistentState = (
+    key: string, 
+    initialState: string
+  ):[string, (newValue: string) => void] => {
   const isMounted = React.useRef(false);
 
   const [value,  setValue] = 
@@ -44,19 +45,51 @@ const useSemiPersistentState = (key, initialState) => {
 
     return [value,  setValue];
   };
-
-const getSumComments = (stories) => {
-  console.log('C');
-
-  return stories.data.reduce(
-    (result, value) => result + value.num_comments,
-    0
-  );
+  
+export type Story = {
+  objectID: string;
+  url: string;
+  title: string;
+  author: string;
+  num_comments: number;
+  points: number;
 };
-  
-  
 
-const storiesReducer = (state, action) => {
+export type Stories = Array<Story>;
+type StoriesState = {
+  data: Stories;
+  isLoading: boolean;
+  isError: boolean;
+};
+
+interface StoriesFetchInitAction {
+  type: 'STORIES_FETCH_INIT';
+}
+
+interface StoriesFetchSuccessAction {
+  type: 'STORIES_FETCH_SUCCESS';
+  payload: Stories;
+}
+
+interface StoriesFetchFailureAction {
+  type: 'STORIES_FETCH_FAILURE';
+}
+
+interface StoriesRemoveAction {
+  type: 'REMOVE_STORY';
+  payload: Story;
+}
+
+type StoriesAction =
+  | StoriesFetchInitAction
+  | StoriesFetchSuccessAction
+  | StoriesFetchFailureAction
+  | StoriesRemoveAction;
+
+const storiesReducer = (
+  state: StoriesState,
+  action: StoriesAction
+) => {
 switch (action.type) {
   case 'STORIES_FETCH_INIT':
     return {
@@ -119,34 +152,33 @@ function App() {
     handleFetchStories()
   }, [handleFetchStories]);
 
-  const handleRemoveStory = React.useCallback((item) => {
+  const handleRemoveStory = React.useCallback((item: Story)  => {
     dispatchStories({
       type: 'REMOVE_STORY',
       payload: item,
     });
   }, []);
 
-  const handleSearchInput = event => {
+  const handleSearchInput = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     event.preventDefault();
     setSearchTerm(event.target.value);
   }
 
-  const handleSearchSubmit = event => {
+  const handleSearchSubmit = (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     setUrl(`${API_ENDPOINT}${searchTerm}`)
   }
 
   console.log('B:App');
 
-  const sumComments = React.useMemo(() => getSumComments(stories), [
-    stories,
-  ]);
-
-
 
   return (
     <StyledContainer>
-      <StyledHeadlinePrimary>My Hacker Stories with {sumComments} comments</StyledHeadlinePrimary>
+      <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
 
       <SearchForm
         searchTerm={searchTerm}

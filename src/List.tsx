@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import React from "react";
-import { ReactComponent as Check } from './check.svg';
+import { Story, Stories } from "./App";
+
 
 const StyledItem = styled.li`
     display: flex;
@@ -18,8 +18,6 @@ const StyledColumn = styled.span`
     a {
         color: inherit;
     }
-
-    width: ${(props) => props.width};
     `;
 
 const StyledButton = styled.button`
@@ -33,6 +31,7 @@ const StyledButton = styled.button`
     &:hover {
         background: #171212;
         fill: #ffffff;
+        color: white;
     }
 `;
 
@@ -41,36 +40,41 @@ const StyledButtonSmall = styled(StyledButton)`
 `;
 
 
-const List = React.memo(
-    ({ list, onRemoveItem }) =>
-        console.log('B:List') || (
-            <ul>
-            {list.map((item) => (
-                <Item
-                key={item.objectID}
-                item={item}
-                onRemoveItem={onRemoveItem}
-                />
-            ))}
-            </ul>
-        )
-    )
+export type ListProps = {
+    list: Stories;
+    onRemoveItem: (item: Story) => void;
+    title: string;
+};
+
+export const List = ({ list, onRemoveItem }: ListProps) => (
+    <ul>
+        {list.map((item) => (
+            <Item
+            key={item.objectID}
+            item={item}
+            onRemoveItem={onRemoveItem}
+            />
+        ))}
+    </ul>
+    );
 
 export default List;
 
-export const Item = ({ item, onRemoveItem }) => {
+export type ItemProps = {
+    item: Story;
+    onRemoveItem: (item: Story) => void;
+};
 
-    return (
+export const Item = ({ item, onRemoveItem }: ItemProps) => (
     <StyledItem>
-        <StyledColumn width="40%" key={item.objectID}>
+        <StyledColumn key={item.objectID}>
                 <a href={item.url}>{item.title}</a>      
         </StyledColumn>
-        <StyledColumn width="20%">
+        <StyledColumn>
             <StyledButtonSmall type="button" onClick={()=> onRemoveItem(item)}>
-                <Check height="18px" width="18px" />
+                remove
             </StyledButtonSmall>
         </StyledColumn>
     </StyledItem>
     )
 
-}
