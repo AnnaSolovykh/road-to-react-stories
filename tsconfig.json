@@ -21,9 +21,6 @@
         "jsx": "react-jsx",
         "types": [
             "jest",
-            "cypress",
-            "@testing-library/cypress",
-            "@types/styled-components-react-native"
             ]
         },
         "include": [
