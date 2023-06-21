@@ -3,10 +3,7 @@ import List from "./List";
 import SearchForm from "./SearchForm";
 import axios from "axios";
 import styled from "styled-components";
-
-
-
-const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
+import LastSearches from "./LastSearches";
 
 const StyledContainer = styled.div`
   height: 130vh;
@@ -25,6 +22,32 @@ const StyledHeadlinePrimary = styled.h1`
   font-weight: 300;
   letter-spacing: 2px;
 `;
+
+const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
+
+const getUrl = (searchTerm) => `${API_ENDPOINT}${searchTerm}`;
+
+const extractSearchTerm = (url) => url.replace(API_ENDPOINT, '');
+
+const getLastSearches = (urls) =>
+  urls
+    .reduce((result, url, index) => {
+      const searchTerm = extractSearchTerm(url);
+
+      if (index === 0) {
+        return result.concat(searchTerm);
+      }
+
+      const previousSearchTerm = result[result.length - 1];
+
+      if (searchTerm === previousSearchTerm) {
+        return result;
+      } else {
+        return result.concat(searchTerm);
+      }
+    }, [])
+    .slice(-6)
+    .slice(0, -1);
 
 const useSemiPersistentState = (key, initialState) => {
   const isMounted = React.useRef(false);
@@ -98,13 +121,14 @@ function App() {
     {data: [], isLoading: false, isError: false}
   );
 
-  const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
+  const [urls, setUrls] = React.useState([getUrl(searchTerm)]);
 
   const handleFetchStories = useCallback(async() => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
   try {
-    const result = await axios.get(url); //axios in the place of fetch, also we don't need to convert to json any more
+    const lastUrl = urls[urls.length - 1];
+    const result = await axios.get(lastUrl);
     dispatchStories({
       type: 'STORIES_FETCH_SUCCESS',
       payload: result.data.hits, //if we use axios, we add data.
@@ -113,7 +137,7 @@ function App() {
     catch{
       dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
     }
-  }, [url]);
+  }, [urls]);
 
   useEffect(() => {
     handleFetchStories()
@@ -133,10 +157,21 @@ function App() {
 
   const handleSearchSubmit = event => {
     event.preventDefault();
-    setUrl(`${API_ENDPOINT}${searchTerm}`)
+    handleSearch(searchTerm);
   }
 
-  console.log('B:App');
+  const handleLastSearch = (searchTerm) => {
+    setSearchTerm(searchTerm);
+
+    handleSearch(searchTerm);
+  };
+
+  const handleSearch = (searchTerm) => {
+    const url = getUrl(searchTerm);
+    setUrls(urls.concat(url));
+  };
+
+  const lastSearches = getLastSearches(urls);
 
   const sumComments = React.useMemo(() => getSumComments(stories), [
     stories,
@@ -147,7 +182,10 @@ function App() {
   return (
     <StyledContainer>
       <StyledHeadlinePrimary>My Hacker Stories with {sumComments} comments</StyledHeadlinePrimary>
-
+      <LastSearches
+        lastSearches={lastSearches}
+        onLastSearch={handleLastSearch}
+      />
       <SearchForm
         searchTerm={searchTerm}
         onSearchInput={handleSearchInput}
