@@ -6,7 +6,7 @@ import styled from "styled-components";
 import LastSearches from "./LastSearches";
 
 const StyledContainer = styled.div`
-  height: 130vh;
+  height: 100%;
   padding: 20px;
   background: #83a4d4;
   background: linear-gradient(to left, #b6fbff, #83a4d4);
@@ -23,11 +23,34 @@ const StyledHeadlinePrimary = styled.h1`
   letter-spacing: 2px;
 `;
 
-const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
+const StyledButton = styled.button`
+    background: transparent;
+    border: 1px solid #171212;
+    padding: 5px 15px;
+    cursor: pointer;
+    margin-left: 40px;
 
-const getUrl = (searchTerm) => `${API_ENDPOINT}${searchTerm}`;
+    transition: all 0.1s ease-in;
 
-const extractSearchTerm = (url) => url.replace(API_ENDPOINT, '');
+    &:hover {
+        background: #171212;
+        fill: #ffffff;
+        color: white;
+    }
+`;
+
+const API_BASE = 'https://hn.algolia.com/api/v1';
+const API_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+const PARAM_PAGE = 'page=';
+
+const getUrl = (searchTerm, page) =>
+  `${API_BASE}${API_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`;
+
+const extractSearchTerm = (url) =>
+  url
+    .substring(url.lastIndexOf('?') + 1, url.lastIndexOf('&'))
+    .replace(PARAM_SEARCH, '');
 
 const getLastSearches = (urls) =>
   urls
@@ -92,7 +115,11 @@ switch (action.type) {
       ...state,
       isLoading: false,
       isError: false,
-      data: action.payload,
+      data:
+      action.payload.page === 0
+        ? action.payload.list
+        : state.data.concat(action.payload.list),
+      page: action.payload.page,
     };
   case 'STORIES_FETCH_FAILURE':
     return {
@@ -118,10 +145,10 @@ function App() {
 
   const [stories, dispatchStories] = useReducer(
     storiesReducer, 
-    {data: [], isLoading: false, isError: false}
+    { data: [], page: 0, isLoading: false, isError: false }
   );
 
-  const [urls, setUrls] = React.useState([getUrl(searchTerm)]);
+  const [urls, setUrls] = React.useState([getUrl(searchTerm, 0)]);
 
   const handleFetchStories = useCallback(async() => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
@@ -131,7 +158,10 @@ function App() {
     const result = await axios.get(lastUrl);
     dispatchStories({
       type: 'STORIES_FETCH_SUCCESS',
-      payload: result.data.hits, //if we use axios, we add data.
+      payload: {
+        list: result.data.hits,
+        page: result.data.page,
+      },
     });
     }
     catch{
@@ -157,17 +187,22 @@ function App() {
 
   const handleSearchSubmit = event => {
     event.preventDefault();
-    handleSearch(searchTerm);
+    handleSearch(searchTerm,0);
   }
 
   const handleLastSearch = (searchTerm) => {
     setSearchTerm(searchTerm);
-
-    handleSearch(searchTerm);
+    handleSearch(searchTerm, 0);
   };
 
-  const handleSearch = (searchTerm) => {
-    const url = getUrl(searchTerm);
+  const handleMore = () => {
+    const lastUrl = urls[urls.length - 1];
+    const searchTerm = extractSearchTerm(lastUrl);
+    handleSearch(searchTerm, stories.page + 1);
+  };
+
+  const handleSearch = (searchTerm, page) => {
+    const url = getUrl(searchTerm, page);
     setUrls(urls.concat(url));
   };
 
@@ -192,17 +227,18 @@ function App() {
         onSearchSubmit={handleSearchSubmit}
       />
 
-      {stories.isError && <p>Something went wrong...</p>}
+      {stories.isError && <p>Something went wrong ...</p>}
+
+      <List list={stories.data} onRemoveItem={handleRemoveStory} />
 
       {stories.isLoading ? (
-      <p>Loading...</p>
+        <p>Loading ...</p>
       ) : (
-      <List 
-        list={stories.data} 
-        onRemoveItem={handleRemoveStory} 
-        title="React Ecosystem" />
+        <StyledButton type="button" onClick={handleMore}>
+          More
+        </StyledButton>
       )}
-      </StyledContainer>
+    </StyledContainer>
   )
   ;
 }
