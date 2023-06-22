@@ -1,6 +1,5 @@
-# Getting Started with Create React App
+# Training Project based on the book Road To React
 
-Training Project based on the book Road To React
 
 ## Available Scripts
 
